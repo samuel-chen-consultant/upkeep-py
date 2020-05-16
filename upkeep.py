@@ -17,7 +17,7 @@ class upkeep:
         # functions to create API calls
         self.get = self.get
         self.post = self.post
-        self.patch =self.patch
+        self.patch = self.patch
         
         # create sub-functions (un-comment as creating)
         self.users = self.users(self)
@@ -29,12 +29,12 @@ class upkeep:
         self.parts = self.parts(self)
         self.requests = self.requests(self)
         self.work_orders = self.work_orders(self)
-#         self.prev_main = self.prev_main(self)
-#         self.wo_sched = self.wo_sched(self)
-#         self.meters = self.meters(self)
-#         self.pur_ord = self.pur_ord(self)
-#         self.pur_ord_cat = self.pur_ord_cat(self)
-#         self.report = self.report(self)
+        self.prev_maint = self.prev_maint(self)
+        self.work_order_sched = self.work_order_sched(self)
+        self.meters = self.meters(self)
+        self.purchase_order = self.purchase_order(self)
+        self.p_order_category = self.p_order_category(self)
+        self.reporting = self.reporting(self)
         
 
 
@@ -70,10 +70,13 @@ class upkeep:
             raise ()
     
     def logout(self):
-        
+        '''
+        helper function to remove a session token
+        should be used after each session
+        '''
         url = self.url + 'auth'
         data = {'Session-Token': self.token}
-        r = requests.delete(url, data=data)
+        r = requests.delete(url, data = data)
         print("you've successfully been logged out")
         self.loggedin = 0
     
@@ -916,4 +919,431 @@ class upkeep:
             
             return r
         
+    class prev_maint:
+        '''
+        used to query within preventative maintenance endpoint.
+        docs - https://developers.onupkeep.com/#work-orders
+        '''
         
+        def __init__(self, upkeep):
+            self.upkeep = upkeep
+            self.epoint = 'preventative-maintenance/'
+            
+        def create_order(self, title, schedule, **kwargs):
+            '''
+            This endpoint creates a new work order.
+            
+            If connected to Zapier, data will be sent for work order trigger.
+            
+            If a user is assigned, and email will be sent to them, else email to admins.
+            https://developers.onupkeep.com/#create-a-preventative-maintenance-work-order
+            '''
+            url = self.upkeep.url + self.epoint
+            
+            r = self.upkeep.post(url, title = title, recurringSchedule = schedule, **kwargs)
+            
+            return r
+        
+        def get_all_orders(self, **kwargs):
+            '''
+            This endpoint retrieves all work orders for your account.
+            * only retrieves root work order, read more in docs
+            https://developers.onupkeep.com/#get-all-preventative-maintenance-work-orders
+            '''
+            url = self.upkeep.url + self.epoint
+            
+            r = self.upkeep.get(url, **kwargs)
+            
+            return r
+        
+        def get_order(self, _previd, **kwargs):
+            '''
+            This endpoint retrieves a specific preventative maintenance order.
+            https://developers.onupkeep.com/#get-a-preventative-maintenance-work-order
+            '''
+            url = self.upkeep.url + self.epoint + str(_previd)
+            
+            r = self.upkeep.get(url, **kwargs)
+            
+            return r
+       
+        def upate_order(self, _previd, **kwargs):
+            '''
+            This endpoint updates a specific work order.d
+            https://developers.onupkeep.com/#update-a-specific-preventative-maintenance-work-order
+            '''
+            url = self.upkeep.url + self.epoint + str(_workid)
+            
+            r = self.upkeep.patch(url, **kwargs)
+            
+            return r
+        
+        def delete_order(self, _previd):
+            '''
+            This endpoint deletes a specific request.
+            https://developers.onupkeep.com/#delete-a-specific-work-order
+            '''
+            url = self.upkeep.url + self.epoint + str(_previd)
+            
+            r = self.upkeep.delete(url)
+            
+            return r
+        
+        
+    class work_order_sched:
+        '''
+        used to query within work order schedule endpoint.
+        docs - https://developers.onupkeep.com/#work-order-schedule
+        '''
+        
+        def __init__(self, upkeep):
+            self.upkeep = upkeep
+            self.epoint = 'work-order-schedule'
+            
+        def get_schedule(self, **kwargs):
+            '''
+            This endpoint retrieves the schedule of all preventative maintenance work orders for your account.
+            https://developers.onupkeep.com/#get-the-schedule-of-preventative-maintenance-work-orders
+            '''
+            url = self.upkeep.url + self.epoint
+            
+            r = self.upkeep.get(url, **kwargs)
+            
+            return r
+        
+    class meters:
+        '''
+        used to query within meters endpoint.
+        docs - https://developers.onupkeep.com/#meters
+        '''
+
+        def __init__(self, upkeep):
+            self.upkeep = upkeep
+            self.epoint = 'meters/'
+        
+        def create_meter(self, name, units, frequency, **kwargs):
+            '''
+            This endpoint creates a new meter.
+            https://developers.onupkeep.com/#meters
+            '''
+            url = self.upkeep.url + self.epoint
+            
+            r = self.upkeep.post(url, title = title, units = units,
+                                 frequency = frequency, **kwargs)
+            return r
+        
+        def get_all_meters(self, **kwargs):
+            '''
+            This endpoint retrieves all meters for your account.
+            https://developers.onupkeep.com/#get-all-meters
+            '''
+            url = self.upkeep.url + self.epoint
+            
+            r = self.upkeep.get(url, **kwargs)
+            
+            return r
+        
+        def get_work_order(self, _workid, **kwargs):
+            '''
+            This endpoint retrieves a specific work order.
+            https://developers.onupkeep.com/#get-a-specific-part
+            '''
+            url = self.upkeep.url + self.epoint + str(_workid)
+            
+            r = self.upkeep.get(url, **kwargs)
+            
+            return r
+       
+        def get_meter(self, _meterid, **kwargs):
+            '''
+            This endpoint updates a specific work order.
+            https://developers.onupkeep.com/#get-a-specific-meter
+            '''
+            url = self.upkeep.url + self.epoint + str(_meterid)
+            
+            r = self.upkeep.patch(url, **kwargs)
+            
+            return r
+        
+        def update_meter(self, _meterid, name, units, frequency, **kwargs):
+            '''
+            This endpoint updates a specific meter.
+            https://developers.onupkeep.com/#update-a-specific-meter
+            '''
+            url = self.upkeep.url + self.epoint + str(_meterid)
+            
+            r = self.upkeep.patch(url, name = name, units = units,
+                                  frequency = frequency, **kwargs)
+            
+            return r
+        
+        def delete_meter(self, _meterid):
+            '''
+            This endpoint deletes a specific meter.
+            https://developers.onupkeep.com/#delete-a-specific-meter
+            '''
+            url = self.upkeep.url + self.epoint + str(_meterid)
+            
+            r = self.upkeep.delete(url)
+            
+            return r
+        
+        def reading_to_meter(self, _meterid, value):
+            '''
+            This endpoint adds a reading to a meter
+            https://developers.onupkeep.com/#add-a-reading-to-a-meter
+            '''
+            url = self.upkeep.url + self.epoint + str(_meterid) + '/readings'
+            
+            r = self.upkeep.post(url, value = value)
+            
+            return r
+        
+        def get_all_readings_meter(self, _meterid, **kwargs):
+            '''
+            This endpoint retrieves all readings for a meter.
+            https://developers.onupkeep.com/#get-all-readings-for-a-meter
+            '''
+            url = self.upkeep.url + self.epoint + str(_meterid) + '/readings'
+            
+            r = self.upkeep.get(url, **kwargs)
+            
+            return r
+        
+        def create_meter_notification(self, _meterid, title, value,
+                                      frequency, **kwargs):
+            '''
+            This endpoint creates a new meter notification for particular meter.
+            https://developers.onupkeep.com/#create-a-meter-notification
+            '''
+            
+            url = self.upkeep.url + self.epoint + str(_meterid) + '/notifications'
+            
+            r = self.upkeep.post(url, title = title, triggerValue = value, 
+                                 triggerFrequency = frequency, **kwargs)
+            
+            return r
+        
+        def get_all_meter_notifications(self, _meterid, **kwargs):
+            '''
+            This endpoint retrieves all notifications for particular meter.
+            https://developers.onupkeep.com/#get-all-meter-notifications
+            '''
+            
+            url = self.upkeep.url + self.epoint + str(_meterid) + '/notifications'
+            
+            r = self.upkeep.get(url, **kwargs)
+            
+        def get_meter_notification(self, _meterid, _notifid, **kwargs):
+            '''
+            This endpoint retrieves all notifications for particular meter.
+            https://developers.onupkeep.com/#get-all-meter-notifications
+            '''
+            
+            url = self.upkeep.url + self.epoint + str(_meterid)
+            q = '/notifications' + _notifid
+            
+            r = self.upkeep.get(url + q, **kwargs)
+            
+            return r
+        
+        def update_meter_notification(self, _meterid, _notifid, **kwargs):
+            '''
+            This endpoint updates a specific meter notification.
+            https://developers.onupkeep.com/#update-a-specific-meter-notification
+            '''
+            
+            url = self.upkeep.url + self.epoint + str(_meterid)
+            q = '/notifications' + _notifid
+            
+            r = self.upkeep.patch(url + q, **kwargs)
+            
+            return r
+        
+        def del_meter_notification(self, _meterid, _notifid):
+            '''
+            This endpoint deletes a specific meter notification.
+            https://developers.onupkeep.com/#delete-a-specific-meter-notification
+            '''
+            url = self.upkeep.url + self.epoint + str(_meterid)
+            q = '/notifications' + _notifid
+            
+            r = self.upkeep.delete(url + q, **kwargs)
+            
+            return r
+        
+    class purchase_order:
+        '''
+        used to query within purchase order endpoint.
+        docs - https://developers.onupkeep.com/#purchase-orders
+        '''
+        def __init__(self, upkeep):
+            self.upkeep = upkeep
+            self.epoint = 'purchase-orders/'
+            
+        def create_order(self, title, **kwargs):
+            '''
+            This endpoint creates a new purchase order.
+            https://developers.onupkeep.com/#purchase-orders
+            '''
+            url = self.upkeep.url + self.epoint
+            
+            r = self.upkeep.post(url, title = title, **kwargs)
+            
+            return r
+        
+        def get_all_orders(self, **kwargs):
+            '''
+            This endpoint retrieves all Purchase Orders for your account.
+            https://developers.onupkeep.com/#get-all-purchase-orders
+            '''
+            url = self.upkeep.url + self.epoint
+            
+            r = self.upkeep.get(url, **kwargs)
+            
+            return r
+        
+        def get_order(self, _orderid, **kwargs):
+            '''
+            This endpoint retrieves a specific Purchase Order.
+            https://developers.onupkeep.com/#get-a-specific-purchase-order
+            '''
+            url = self.upkeep.url + self.epoint + str(_orderid)
+            
+            r = self.upkeep.patch(url, **kwargs)
+            
+            return r
+        
+        def update_order(self, _orderid, **kwargs):
+            '''
+            This endpoint updates a specific meter.
+            https://developers.onupkeep.com/#update-a-specific-meter
+            '''
+            url = self.upkeep.url + self.epoint + str(_orderid)
+            
+            r = self.upkeep.patch(url, **kwargs)
+            
+            return r
+        
+        def patrially_fulfill_order(self, _orderid, **kwargs):
+            '''
+            This API call partially fulfills a Purchase Order.
+            https://developers.onupkeep.com/#partially-fulfill-a-purchase-order
+            '''
+            url = self.upkeep.url + self.epoint + str(_orderid)
+            
+            r = self.upkeep.patch(url, **kwargs)
+            
+            return r
+        
+        def del_order(self, _orderid):
+            '''
+            This endpoint deletes a specific Purchase Order.
+            https://developers.onupkeep.com/#delete-a-specific-purchase-order
+            '''
+            url = self.upkeep.url + self.epoint + str(_orderid)
+            
+            r = self.upkeep.patch(url, **kwargs)
+            
+            return r
+        
+        def add_message(self, _orderid, message):
+            '''
+            This endpoint adds update message for particular Purchase Order.
+            https://developers.onupkeep.com/#add-text-message-to-purchase-order
+            '''
+            url = self.upkeep.url + self.epoint
+            q = str(_orderid) + '/update-messages'
+            
+            r = self.upkeep.patch(url, text = message, **kwargs)
+            
+            return r
+        
+    class p_order_category:
+        '''
+        used to query within purchase order category endpoint.
+        docs - https://developers.onupkeep.com/#purchase-order-category
+        '''
+        def __init__(self, upkeep):
+            self.upkeep = upkeep
+            self.epoint = 'purchase-order-categories/'
+            
+        def create_category(self, name, **kwargs):
+            '''
+            This endpoint creates a new purchase order category.
+            https://developers.onupkeep.com/#purchase-orders
+            '''
+            url = self.upkeep.url + self.epoint
+            
+            r = self.upkeep.post(url, name = name)
+            
+            return r
+        
+        def get_all_categories(self, **kwargs):
+            '''
+            This endpoint retrieves all purchase order categories for your account.
+            https://developers.onupkeep.com/#get-all-purchase-orders-categories
+            '''
+            url = self.upkeep.url + self.epoint
+            
+            r = self.upkeep.get(url)
+            
+            return r
+        
+        def get_category(self, _catid, **kwargs):
+            '''
+            This endpoint retrieves a specific Purchase Order Category.
+            https://developers.onupkeep.com/#get-all-purchase-orders-categories
+            '''
+            url = self.upkeep.url + self.epoint + str(_catid)
+            
+            r = self.upkeep.patch(url, **kwargs)
+            
+            return r
+        
+        def update_category(self, _catid, **kwargs):
+            '''
+            This endpoint updates a specific meter.
+            https://developers.onupkeep.com/#update-a-specific-meter
+            '''
+            url = self.upkeep.url + self.epoint + str(_catid)
+            
+            r = self.upkeep.patch(url, **kwargs)
+            
+            return r
+        
+        def del_category(self, _catid):
+            '''
+            This endpoint deletes a specific Purchase Order Category.
+            https://developers.onupkeep.com/#delete-a-specific-purchase-order-category
+            '''
+            url = self.upkeep.url + self.epoint + str(_catid)
+            
+            r = self.upkeep.patch(url, **kwargs)
+            
+            return r
+        
+    class reporting:
+        '''
+        IN BETA
+        
+        Public api for for fetching various aggregate counts eg Work Orders open, In progress, Avg time to complete etc. User can group by different entities and apply various filters. By default data is fetched for Work Orders created within last month
+        
+        https://developers.onupkeep.com/#get-work-order-aggregate-counts
+        '''
+        def __init__(self, upkeep):
+            self.upkeep = upkeep
+            
+        def get_agg_counts(self, **kwargs):
+            
+            url = 'https://analytics-api.onupkeep.com/v2/work-orders/dashboard'
+            
+            r = self.upkeep.get(url, **kwargs)
+            
+            return r
+        
+        
+        
+# if you've made it this far, thanks for taking the time to peruse my work. 
+# let's chat - hello@dancorley.com
+            

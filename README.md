@@ -29,7 +29,7 @@ It will include all of the API calls from the documentation found [here](https:/
     }
 
 # create a user by passing in credentials
-[4]: u.users.create_user('newuser@onupkeep.com', 'ADMIN', 'trickyPass',
+[3]: u.users.create_user('newuser@onupkeep.com', 'ADMIN', 'trickyPass',
                          firstName='Marty', lastName='McFly',
                          phoneNumber='800-123-4567'
                         )
@@ -53,7 +53,7 @@ It will include all of the API calls from the documentation found [here](https:/
         
 
 # return all users in your organization
-[3]: u.users.get_all_users()
+[4]: u.users.get_all_users()
 
     {
       "success": true,
@@ -68,6 +68,11 @@ It will include all of the API calls from the documentation found [here](https:/
         "updatedAt": "2017-12-08T18:41:44.335Z"
       }
     }
+    
+# log out and delete session token
+[5]: u.logout()
+    
+    "you've successfully been logged out"
 
 ```
 
