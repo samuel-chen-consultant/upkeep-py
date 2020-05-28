@@ -53,21 +53,25 @@ class upkeep:
             data = {'email': self.email,
                     'password': _pass}
             
-            # uncomment when credentials are given
-            # r = requests.post(url, data=data)
-            # if r.status_code != requests.codes.ok:
-            #     print('''something went wrong.
-            #     please check your credentials and try again''')
-            #     return None
-            # r = r.json()['result']['sessionToken']
+#             uncomment when credentials are given
+            r = requests.post(url, data=data)
+            if r.status_code != requests.codes.ok:
+                
+                raise RuntimeError('''
+                
+                Login Failed. Please re-check your email and password.
+                
+                ''')
+                
+            r = r.json()['result']['sessionToken']
             self.loggedin = 1
             
-        return data
+        return r
 
     def login_check(self):
         # Do I need this???
         if not self.loggedin:
-            raise ()
+            pass
     
     def logout(self):
         '''
@@ -86,10 +90,19 @@ class upkeep:
         
         params = kwargs
         headers = {'Session-Token': self.token}
-#         # uncomment when credentials are given
-#         requests.get(url, params, headers = headers)
         
-        return url, params
+        r = requests.get(url, params, headers = headers)
+        
+        try:
+            try:
+                r = r.json()['results']
+            except:
+                r = r.json()['result']
+        except:
+            print('no results')
+            r = None
+        
+        return r
     
     def post(self, url, **kwargs):
         '''helper function for the various subclasses'''
@@ -97,10 +110,9 @@ class upkeep:
         data = kwargs
         headers = {'Session-Token': self.token}
         
-#         # uncomment when credentials are given
-#         requests.post(url = url, data = data)
+        r = requests.post(url = url, headers = headers, data = data)
         
-        return url, data
+        return r.json()
     
     def patch(self, url, **kwargs):
         '''helper function for the various subclasses'''
@@ -108,17 +120,17 @@ class upkeep:
         data = kwargs
         headers = {'Session-Token': self.token}
         
-#         # uncomment when credentials are given
-#         requests.patch(url, data, headers = headers)
+        r = requests.patch(url, data = data, headers = headers)
 
-        return url, data
+        return r
 
     def delete(self, url, **kwargs):
         '''helper function for the various subclasses'''
+        
         data = kwargs
         headers = {'Session-Token': self.token}
-#         # uncomment when credentials are given
-#         requests.delete(url, headers = headers)
+
+        requests.delete(url, headers = headers)
     
         return url, data
 
@@ -132,6 +144,17 @@ class upkeep:
         def __init__(self, upkeep):
             self.upkeep = upkeep
             self.epoint = 'users/'
+
+        def post(self, url, **kwargs):
+            '''helper function for the various subclasses'''
+
+            data = kwargs
+            headers = {'Session-Token': self.token}
+
+            # uncomment when credentials are given
+            r = requests.post(url = url, data = data)
+
+            return r
             
         def create_user(self, email, accountType, password, **kwargs):
             '''
@@ -406,7 +429,7 @@ class upkeep:
             
             return r
 
-        def get_all_teams(self, **kwargs):
+        def get_all_assets(self, **kwargs):
             '''
             This endpoint retrieves all assets for your account.
             https://developers.onupkeep.com/#get-all-assets
