@@ -10,8 +10,6 @@ It will include all of the API calls from the documentation found [here](https:/
     * to make API calls
 * base64:
     * simple password encryption
-* ciso8601:
-    * fast unix time conversion
 
 ## Quick Start:
 ```python
