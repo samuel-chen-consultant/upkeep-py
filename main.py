@@ -1,6 +1,6 @@
 from upkeep import upkeep
 
-u = upkeep('samuel.chen.consultant@terawattinfrastructure.com', '')
+u = upkeep('user','password')
 locations = u.locations.get_all_locations()
 
 location_lut = {}
